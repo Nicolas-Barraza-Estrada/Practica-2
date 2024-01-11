@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
-
+# Detectar los punto de inicio - fin
+# Detectar el centro de la bola
+# Reconocer si la bola esta dentreo o fuera del las csasillas de inicio - fin
 def detectar_circulos_verdes(imagen):
     # Convertir la imagen a formato HSV
     hsv = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)

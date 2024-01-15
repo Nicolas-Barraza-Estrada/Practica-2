@@ -47,9 +47,9 @@ while True:
     ret, frame = cap.read()
     # Detectar círculos verdes en la imagen
     detectar_circulos_verdes(frame)
-    # Muestra el cuadro original en la ventana principal
+    # Muestra la ventana principal
     cv2.imshow('Camara', frame)
-    # Espera 25 milisegundos (ajustar según la velocidad deseada)
+    # Espera 25 milisegundos
     key = cv2.waitKey(25) & 0xFF
 
     # Verifica si la tecla "Enter" ha sido presionada

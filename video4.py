@@ -19,7 +19,7 @@ lower_green = np.array([39, 65, 110])
 upper_green = np.array([54, 255, 255])
 
 # Ruta del archivo de video
-video_path = 'fake.mp4'  # Cambia esto con la ruta correcta de tu video
+video_path = 'video4.mp4'  # Cambia esto con la ruta correcta de tu video
 
 # Abre el archivo de video
 cap = cv2.VideoCapture(video_path)

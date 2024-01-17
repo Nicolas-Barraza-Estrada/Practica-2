@@ -61,7 +61,7 @@ def resaltadoDeColores(image_path):
     cv2.destroyAllWindows()
     return [Tmin, Tmax, Pmin, Pmax, Lmin, Lmax, Lmax, x, y, w, h]
 
-image_path = "8.jpg"  # Cambia esto a la ruta de tu imagen
+image_path = "9.jpg"  # Cambia esto a la ruta de tu imagen
 arrayHsv = resaltadoDeColores(image_path)
 x = arrayHsv[8]
 y = arrayHsv[9]

@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
 import datetime
-import tkinter as tk
+import tkinter as tk #pip install tk-tools              sudo apt-get install python3-tk
 from tkinter import Button, Label
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk #pip install pillow      pip3 install --upgrade Pillow
 
 # Función para detectar círculos verdes en una imagen
 # Función para detectar círculos verdes en una imagen

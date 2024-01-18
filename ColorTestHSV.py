@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-import imutils
+import imutils #pip install imutils
 
 def resaltadoDeColores(image_path):
     def nada(x):

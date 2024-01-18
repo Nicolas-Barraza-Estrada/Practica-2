@@ -89,7 +89,7 @@ while True:
     key = cv2.waitKey(25) & 0xFF
 
     # Verificar si la tecla 'q' ha sido presionada para salir del bucle
-    if key == ord('q'):
+    if key == ord('q') or key == 27:
         break
 
     # Actualizar la interfaz gráfica

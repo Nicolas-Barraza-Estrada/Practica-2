@@ -23,8 +23,8 @@ imagen_path = "9.jpg"  # Cambia esto con la ruta de tu imagen
 imagen = cv2.imread(imagen_path)
 
 # Número de filas y columnas en la grilla
-filas = 40
-columnas = 40
+filas = 50
+columnas = 50
 
 # Dibujar la grilla
 imagen_con_grilla = dibujar_grilla(imagen.copy(), filas, columnas)

@@ -9,8 +9,8 @@ from PIL import Image, ImageTk #pip install pillow      pip3 install --upgrade P
 # Función para detectar círculos verdes en una imagen
 def detectar_circulos_verdes(imagen):
     hsv = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
-    mascara = cv2.inRange(hsv, np.array([39, 65, 110]), np.array([54, 255, 255]))
-    circulos = cv2.HoughCircles(mascara, cv2.HOUGH_GRADIENT, dp=2, minDist=10,
+    mascara = cv2.inRange(hsv, np.array([9, 177, 113]), np.array([44, 255, 255]))
+    circulos = cv2.HoughCircles(mascara, cv2.HOUGH_GRADIENT, dp=3, minDist=15,
                                 param1=40, param2=30, minRadius=10, maxRadius=50)
     if circulos is not None:
         circulos = np.uint16(np.around(circulos))

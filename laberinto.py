@@ -55,9 +55,7 @@ imagen_original = cargar_imagen(ruta_imagen)
 imagen_binaria = binarizar_imagen(imagen_original)
 
 # Definir el tamaño de la cuadrícula
-n = 50
-
-
+n = 60
 # Generar la matriz de la cuadrícula
 matriz_cuadricula = generar_matriz_cuadricula(imagen_binaria, n)
 
@@ -66,6 +64,9 @@ matriz_cuadricula = generar_matriz_cuadricula(imagen_binaria, n)
 imagen_con_cuadricula = dibujar_cuadricula(imagen_binaria.copy(), n)
 matriz_str = f"{n} {n}\n" + "\n".join(" ".join(map(str, n)) for n in matriz_cuadricula)
 print(matriz_str)
+# Ejecutar el programa C++ desde Python
+#process = subprocess.Popen(['./a-estrella'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+#stdout, stderr = process.communicate(input=matriz_str)
 # Mostrar la imagen binaria con la cuadrícula dibujada
 cv2.imshow('Imagen Binaria con Cuadrícula', imagen_con_cuadricula)
 cv2.waitKey(0)

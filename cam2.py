@@ -1,42 +1,40 @@
 import cv2
 import numpy as np
 import datetime
-import tkinter as tk
+import tkinter as tk #pip install tk-tools              sudo apt-get install python3-tk
 from tkinter import Button, Label
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk #pip install pillow      pip3 install --upgrade Pillow
 
-# Función para detectar objeto amarillo en la imagen
-def detectar_objeto_amarillo(imagen):
+# Función para detectar círculos verdes en una imagen
+# Función para detectar círculos verdes en una imagen
+def detectar_circulos_verdes(imagen):
     hsv = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
-    # Definir el rango de color amarillo en HSV
-    amarillo_bajo = np.array([12, 130, 143])
-    amarillo_alto = np.array([35, 252, 255])
+    mascara = cv2.inRange(hsv, np.array([9, 177, 113]), np.array([44, 255, 255]))
+    circulos = cv2.HoughCircles(mascara, cv2.HOUGH_GRADIENT, dp=3, minDist=15,
+                                param1=40, param2=30, minRadius=10, maxRadius=50)
+    if circulos is not None:
+        circulos = np.uint16(np.around(circulos))
+        coordenadas = circulos[0, 0, :2]
 
-    # Crear una máscara que solo incluya objetos amarillos
-    mascara = cv2.inRange(hsv, amarillo_bajo, amarillo_alto)
+        # Dibuja un círculo en el centro del objeto en la ventana en escala de grises
+        cv2.circle(frame, (coordenadas[0], coordenadas[1]), 5, (0, 255, 0), -1)
 
-    # Encontrar contornos en la máscara
-    contornos, _ = cv2.findContours(mascara, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # Si se está guardando, añade las coordenadas a la lista
+        if guardando_coordenadas:
+            coordenadas_guardadas.append(coordenadas)
 
-    encontrado = False
-    for contorno in contornos:
-        area = cv2.contourArea(contorno)
-        if area > 500:
-            x, y, w, h = cv2.boundingRect(contorno)
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            coordenadas = (x + w // 2, y + h // 2)
-            if guardando_coordenadas:
-                coordenadas_guardadas.append(coordenadas)
-            etiqueta_coordenadas.config(text=f'Coordenadas: {coordenadas}')
-            encontrado = True
-            break  # Suponiendo que solo nos interesa el primer objeto encontrado
-
-    if not encontrado:
-        etiqueta_coordenadas.config(text='Objeto amarillo no detectado')
-
+        # Muestra las coordenadas en la esquina superior izquierda de la pantalla
+        #cv2.putText(frame, f'Coordenadas: ({coordenadas[0]}, {coordenadas[1]})', (10, 30), cv2.FONT_HERSHEY_SIMPLEX , 0.5, (0, 0, 0), 1)
+        #print(f'Coordenadas: ({coordenadas[0]}, {coordenadas[1]})')
+        etiqueta_coordenadas.config(text=f'Coordenadas: ({coordenadas[0]}, {coordenadas[1]})')
+    else:
+        #cv2.putText(frame, 'No se ha detectado la bola', (10, 30), cv2.FONT_HERSHEY_TRIPLEX, 0.5, (0, 0, 0), 2)
+        etiqueta_coordenadas.config(text=f'No se ha detectado la bola')
+    return circulos
 def alternar_grabacion():
-    global guardando_coordenadas, coordenadas_guardadas, dibujar
+    global guardando_coordenadas, coordenadas_guardadas
     if guardando_coordenadas:
+        # Detiene la grabación y guarda las coordenadas en un archivo
         guardando_coordenadas = False
         fecha_hora = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         archivo_txt = f'{fecha_hora}.txt'
@@ -46,66 +44,59 @@ def alternar_grabacion():
         print(f'Coordenadas guardadas en {archivo_txt}')
         boton_grabar.config(text="Comenzar a Grabar")
     else:
+        # Comienza a grabar coordenadas
         guardando_coordenadas = True
         coordenadas_guardadas = []
-        dibujar = False  # Restablecer dibujar a False al comenzar una nueva grabación
         boton_grabar.config(text="Detener Grabación")
-
-def dibujar_trayectoria():
-    global dibujar
-    dibujar = True
 
 # Crear la ventana de la interfaz
 ventana = tk.Tk()
 ventana.title("Interfaz Simple")
 
-# Abrir la cámara
-cap = cv2.VideoCapture(0)
-ancho_camara = 1280
-alto_camara = 720
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, ancho_camara)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, alto_camara)
-
-canvas_camara = tk.Canvas(ventana, width=ancho_camara, height=alto_camara)
+# Crear un Canvas para mostrar la cámara
+canvas_camara = tk.Canvas(ventana)
 canvas_camara.pack()
 
+# Crear una etiqueta para mostrar las coordenadas
 etiqueta_coordenadas = Label(ventana, text='', font=('Helvetica', 12))
 etiqueta_coordenadas.pack(pady=10)
 
+# Agregar un botón para comenzar a grabar
 boton_grabar = Button(ventana, text="Comenzar a Grabar", command=alternar_grabacion)
 boton_grabar.pack(pady=10)
 
-boton_dibujar_trayectoria = Button(ventana, text="Dibujar Trayectoria", command=dibujar_trayectoria)
-boton_dibujar_trayectoria.pack(pady=10)
-
+# Variables para la gestión de coordenadas
 guardando_coordenadas = False
 coordenadas_guardadas = []
-dibujar = False
 
+# Abrir la cámara
+cap = cv2.VideoCapture(0)  # El argumento 0 representa la cámara principal
 
-cap.set(cv2.CAP_PROP_FPS, 60)
+# Bucle para reproducir el video en bucle
 while True:
+    # Leer un cuadro de la cámara
     ret, frame = cap.read()
-    detectar_objeto_amarillo(frame)
-
-    if dibujar and len(coordenadas_guardadas) > 1:
-        # Dibujar líneas entre cada par de puntos
-        for i in range(1, len(coordenadas_guardadas)):
-            cv2.line(frame, coordenadas_guardadas[i - 1], coordenadas_guardadas[i], (255, 0, 0), 2)
-
+    # Detectar círculos verdes en la imagen
+    detectar_circulos_verdes(frame)
+    # Convertir el cuadro de OpenCV a formato de imagen Tkinter
     img_tk = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     img_tk = Image.fromarray(img_tk)
     img_tk = ImageTk.PhotoImage(img_tk)
     
+    # Actualizar la imagen en el Canvas
     canvas_camara.create_image(0, 0, anchor=tk.NW, image=img_tk)
-
+    # Esperar 25 milisegundos
     key = cv2.waitKey(25) & 0xFF
+
+    # Verificar si la tecla 'q' ha sido presionada para salir del bucle
     if key == ord('q') or key == 27:
         break
 
+    # Actualizar la interfaz gráfica
     ventana.update_idletasks()
     ventana.update()
 
+# Liberar los recursos y cerrar las ventanas
 cap.release()
 cv2.destroyAllWindows()
 ventana.mainloop()

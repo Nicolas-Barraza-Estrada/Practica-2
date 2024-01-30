@@ -71,3 +71,6 @@ print(matriz_str)
 cv2.imshow('Imagen Binaria con Cuadrícula', imagen_con_cuadricula)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
+
+#toma la captura
+#n

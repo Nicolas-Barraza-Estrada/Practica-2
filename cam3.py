@@ -9,8 +9,8 @@ from PIL import Image, ImageTk
 def detectar_objeto_amarillo(imagen):
     hsv = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
     # Definir el rango de color amarillo en HSV
-    amarillo_bajo = np.array([12, 130, 143])
-    amarillo_alto = np.array([35, 252, 255])
+    amarillo_bajo = np.array([75, 130, 146])
+    amarillo_alto = np.array([104, 255, 255])
 
     # Crear una máscara que solo incluya objetos amarillos
     mascara = cv2.inRange(hsv, amarillo_bajo, amarillo_alto)
@@ -21,7 +21,7 @@ def detectar_objeto_amarillo(imagen):
     encontrado = False
     for contorno in contornos:
         area = cv2.contourArea(contorno)
-        if area > 500:
+        if area > 400:
             x, y, w, h = cv2.boundingRect(contorno)
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
             coordenadas = (x + w // 2, y + h // 2)

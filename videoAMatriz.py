@@ -3,6 +3,31 @@ import numpy as np
 from tkinter import *
 from PIL import Image, ImageTk
 import subprocess
+import math
+
+def encontrar_centro_cuadricula(matriz):
+    filas = len(matriz)
+    columnas = len(matriz[0])
+
+    # Encontrar el centro de la cuadrícula
+    centro_fila = filas // 2
+    centro_columna = columnas // 2
+
+    distancia_minima = float('inf')
+    indice_mas_cercano = None
+    # Iterar sobre la matriz
+    for i in range(filas):
+        for j in range(columnas):
+            # Verificar si el elemento es 1 en la cuadrícula
+            if matriz[i][j] == 1:
+                # Calcular la distancia al centro
+                distancia = math.sqrt((centro_fila - i)**2 + (centro_columna - j)**2)
+
+                # Actualizar el índice más cercano si la distancia es menor
+                if distancia < distancia_minima:
+                    distancia_minima = distancia
+                    indice_mas_cercano = (i, j)
+    return indice_mas_cercano
 
 def dibujar_cuadricula(imagen, n):
     alto, ancho = imagen.shape
@@ -62,22 +87,51 @@ def capturar_y_procesar_imagen():
     frame = cv2.resize(frame, (1280, 720))  # Convertir BGR a HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-    color_tablero = [58, 100, 56, 127, 113, 240]
+    color_tablero = [53, 106, 0, 221, 103, 231]
     color_inicio = [90, 107, 178, 255, 205, 255]
     color_final = [136, 162, 0, 212, 239, 255]
     color_bola = [0, 70, 0, 233, 203, 255]
+    
     maskTablero = crear_mascara(hsv, color_tablero)
     maskInicio = crear_mascara(hsv, color_inicio)
     maskFinal = crear_mascara(hsv, color_final)
     
     fondo_con_cuadricula = dibujar_cuadricula(maskTablero.copy(), n) # Guardar imagen con cuadrícula
+    inicio_con_cuadricula = dibujar_cuadricula(maskInicio.copy(), n) # Guardar imagen con cuadrícula
+    final_con_cuadricula = dibujar_cuadricula(maskFinal.copy(), n) # Guardar imagen con cuadrícula
 
-    cv2.imwrite(ruta_imagen_cuadricula, fondo_con_cuadricula) # Mostrar imagen procesada en Tkinter
+
+    #mostrar inicio con cuadricula
+    cv2.imwrite('inicio_webcgram.jpg', inicio_con_cuadricula) # Mostrar imagen procesada en Tkinter
+    #mostrar_imagen_en_tk(inicio_con_cuadricula, lmain) # Generar matriz de la cuadrícula
+
+    #mostrar final con cuadricula
+    cv2.imwrite('final_webcgram.jpg', final_con_cuadricula) # Mostrar imagen procesada en Tkinter
+    #mostrar_imagen_en_tk(final_con_cuadricula, lmain) # Generar matriz de la cuadrícula
+    
+    #Mostrar fondo con cuadricula
+    cv2.imwrite('fondo_webcgram.jpg', fondo_con_cuadricula) # Mostrar imagen procesada en Tkinter
     mostrar_imagen_en_tk(fondo_con_cuadricula, lmain) # Generar matriz de la cuadrícula
+
 
     # Generar matriz de la cuadrícula
     matriz_cuadricula = generar_matriz_cuadricula(maskTablero, n)
+    # Generar matriz de inicio
+    matriz_inicio = generar_matriz_cuadricula(maskInicio, n)
+    centro_inicial = encontrar_centro_cuadricula(matriz_inicio)
     matriz_str = f"{n} {n} \n" + "\n".join(" ".join(map(str, fila)) for fila in matriz_cuadricula)
+    print(matriz_str) #####BORRAR DESPUES
+    
+    print(centro_inicial) # Encontrar el centro de la cuadrícula
+
+    # Generar matriz de final
+    matriz_final = generar_matriz_cuadricula(maskFinal, n)
+    centro_final = encontrar_centro_cuadricula(matriz_final)
+    print(centro_final)
+
+    matriz_str = f"{n} {n} \n" + "\n".join(" ".join(map(str, fila)) for fila in matriz_cuadricula)
+    print(matriz_str) #####BORRAR DESPUES
+    matriz_str = f"{n} {n} \n" + "\n".join(" ".join(map(str, fila)) for fila in matriz_inicio)
     print(matriz_str) #####BORRAR DESPUES
     process = subprocess.Popen(['./revisar'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
 
@@ -123,7 +177,7 @@ btn_mostrar_cuadricula.pack(anchor=CENTER, expand=True) # Botón para mostrar la
 ######TKINTER########
 
 ruta_imagen_webcam = 'imagen_webcam.jpg'
-ruta_imagen_cuadricula = 'imagen_con_cuadricula.jpg'
+ruta_imagen_cuadricula = 'fondo_webcgram.jpg'
 n =100
 
 mostrar_frame()

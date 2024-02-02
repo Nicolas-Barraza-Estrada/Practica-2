@@ -614,6 +614,8 @@ int main()
 	/* Description of the Grid-
 	1--> The cell is not blocked
 	0--> The cell is blocked */
+	int i1, i2,f1,f2;
+    std::cin >> i1 >> i2 >> f1 >> f2;
 	int grid[ROW][COL];
     for (int i = 0; i < ROW; ++i) {
         for (int j = 0; j < COL; ++j) {
@@ -621,10 +623,20 @@ int main()
         }
     }
 	// Source is the left-most bottom-most corner
-	Pair src = make_pair(88, 18);
+	Pair src = make_pair(i1, i2);
 
 	// Destination is the left-most top-most corner
-	Pair dest = make_pair(88, 84);
+	Pair dest = make_pair(f1, f2);
+	//IMPRIMIR SRC Y DEST
+	std::cout << "Source: " << src.first << ", " << src.second << std::endl;
+	std::cout << "Destination: " << dest.first << ", " << dest.second << std::endl;
+	//imprime la matriz
+	for (int i = 0; i < ROW; ++i) {
+		for (int j = 0; j < COL; ++j) {
+			std::cout << grid[i][j] << " ";
+		}
+		std::cout << std::endl;
+	}
 
 	aStarSearch(grid, src, dest);
 

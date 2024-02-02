@@ -96,7 +96,7 @@ while True:
     img_tk = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     img_tk = Image.fromarray(img_tk)
     img_tk = ImageTk.PhotoImage(img_tk)
-    
+
     canvas_camara.create_image(0, 0, anchor=tk.NW, image=img_tk)
 
     key = cv2.waitKey(25) & 0xFF

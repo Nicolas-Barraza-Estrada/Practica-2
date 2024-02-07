@@ -6,8 +6,6 @@ import numpy as np
 import math
 import subprocess
 import datetime
-import os
-import sys
 class WebcamApp:
     def __init__(self, window, window_title):
         self.window = window
@@ -125,10 +123,14 @@ class WebcamApp:
     def capturar_inicio_fin(self):
         # Obtener un frame de la webcam
         #print(matriz_str)
+        global centro_bola
         ret, frame = self.vid.read()
-        color_inicio = [90, 107, 178, 255, 205, 255]
+        color_inicio = [29, 37, 125, 54, 203, 255]
+        amarillo_bajo = np.array([29, 37, 125])
+        amarillo_alto = np.array([54, 203, 255])
         color_final = [136, 162, 0, 212, 239, 255]
-        inicio_fin = [color_inicio, color_final]
+        self.detectar_objeto_amarillo(frame,amarillo_bajo,amarillo_alto)
+        inicio_fin = [color_final]
         mask = []
         count = 0
         for color in inicio_fin:
@@ -164,40 +166,14 @@ class WebcamApp:
         centros = []
         for i in cuadriculas:
             centros.append(self.encontrar_centro_cuadricula(i))
-        centro_inicio, centro_fin = centros
-        matriz_inicio_fin_str = f"{centro_inicio[0]} {centro_inicio[1]} {centro_fin[0]} {centro_fin[1]} \n"
-        matriz_c = f"{centro_inicio[0]} {centro_inicio[1]} {centro_fin[0]} {centro_fin[1]} \n" + "\n".join(" ".join(map(str, fila)) for fila in matriz_cuadricula)
+        centro_fin = centros
+        print(f'Centro de la bola: {centro_bola}')
+        centro_inicio = [0,0]
+        #matriz_inicio_fin_str = f"{centro_inicio[0]} {centro_inicio[1]} {centro_fin[0]} {centro_fin[1]} \n"
+        matriz_c = f"{centro_bola[0]} {centro_bola[1]} {centro_fin[0]} {centro_fin[1]} \n" + "\n".join(" ".join(map(str, fila)) for fila in matriz_cuadricula)
         process = subprocess.Popen(['./revisar'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
         stdout, stderr = process.communicate(input=matriz_c)
-        # Filtramos las líneas para asegurarnos de que solo procesamos aquellas que contienen coordenadas.
-        # Abre el archivo para lectura
-        coordenadas = []
-        with open('path.txt', 'r') as file:
-            # Lee todas las líneas del archivo
-            lines = file.readlines()
-
-            # Procesa cada línea
-            for line in lines:
-                # Elimina los caracteres de nueva línea y espacios adicionales
-                line = line.strip()
-                # Imprime la línea (coordenada)
-                # Opcional: Convertir la cadena a una tupla de enteros
-                # Esto asume que el formato de cada línea es '(x,y)'
-                # Quita los paréntesis y divide por la coma
-                coordinates = line[1:-1].split(',')
-                # Convierte los elementos divididos en enteros
-                x, y = int(coordinates[0]), int(coordinates[1])
-                # Ahora puedes usar x, y como enteros, por ejemplo, agregarlos a una lista o realizar cálculos
-                #print(f"({x}, {y})")
-                matriz_cuadricula[x][y] = 8
-                coordenadas.append([x, y])
-        for i in coordenadas:print(i)
-
-        matriz_str = f"{n} {n}\n" + "\n".join(" ".join(map(str, fila)) for fila in matriz_cuadricula)
-        print(matriz_str)
-
-
-# Ahora coordenadas solo incluirá tuplas de enteros válidas, ignorando líneas no deseadas
+        print("Salida del programa C++:", stdout)
 
     def comenzar_a_grabar(self):
         if self.guardando_coordenadas:
@@ -221,11 +197,10 @@ class WebcamApp:
         else:
             self.boton_dibujar_trayectoria.config(text="Dibujar Trayectoria")
 
-    def detectar_objeto_amarillo(self, frame):
+    def detectar_objeto_amarillo(self, frame,bajo,alto):
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        amarillo_bajo = np.array([29, 37, 125])
-        amarillo_alto = np.array([54, 203, 255])
-        mascara = cv2.inRange(hsv, amarillo_bajo, amarillo_alto)
+
+        mascara = cv2.inRange(hsv,bajo,alto)
         contornos, _ = cv2.findContours(mascara, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         encontrado = False
@@ -238,8 +213,9 @@ class WebcamApp:
                 if self.guardando_coordenadas:
                     fila = int(coordenadas[1] / (960 /  100))
                     columna = int(coordenadas[0] / (1280 / 100))
-                    self.coordenadas_guardadas.append((fila, columna))
                     print(f"Posición en el laberinto: Fila {fila}, Columna {columna}")
+                    self.coordenadas_guardadas.append(f'{fila}, {columna}')
+                    centro_bola = [fila,columna]
                 self.etiqueta_coordenadas.config(text=f'Coordenadas: {coordenadas}')
                 encontrado = True
                 break  # Solo nos interesa el primer objeto grande encontrado
@@ -248,10 +224,12 @@ class WebcamApp:
 
     def update(self):
         # Obtener el frame de la video fuente
+        amarillo_bajo = np.array([29, 37, 125])
+        amarillo_alto = np.array([54, 203, 255])
         ret, frame = self.vid.read()
         if ret:
             if self.guardando_coordenadas:
-                self.detectar_objeto_amarillo(frame)
+                self.detectar_objeto_amarillo(frame,amarillo_bajo,amarillo_alto)
                 if self.dibujar and len(self.coordenadas_guardadas) > 1:
                     for i in range(1, len(self.coordenadas_guardadas)):
                         cv2.line(frame, self.coordenadas_guardadas[i - 1], self.coordenadas_guardadas[i], (255, 0, 0), 2)

@@ -9,8 +9,8 @@ from PIL import Image, ImageTk
 def detectar_objeto_amarillo(imagen):
     hsv = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
     # Definir el rango de color amarillo en HSV
-    amarillo_bajo = np.array([75, 130, 146])
-    amarillo_alto = np.array([104, 255, 255])
+    amarillo_bajo = np.array([29, 37, 125])
+    amarillo_alto = np.array([54, 203, 255])
 
     # Crear una máscara que solo incluya objetos amarillos
     mascara = cv2.inRange(hsv, amarillo_bajo, amarillo_alto)
@@ -27,6 +27,14 @@ def detectar_objeto_amarillo(imagen):
             coordenadas = (x + w // 2, y + h // 2)
             if guardando_coordenadas:
                 coordenadas_guardadas.append(coordenadas)
+                #print(f'Coordenadas guardadas: {(coordenadas)}')
+
+                fila = int(coordenadas[1] / (720 /  100))
+                columna = int(coordenadas[0] / (1280 / 100))
+                print(f"Posición en el laberinto: Fila {fila}, Columna {columna}")
+            # Muestra la posición en consola
+
+
             etiqueta_coordenadas.config(text=f'Coordenadas: {coordenadas}')
             encontrado = True
             break  # Suponiendo que solo nos interesa el primer objeto encontrado

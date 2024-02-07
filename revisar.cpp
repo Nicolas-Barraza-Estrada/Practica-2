@@ -1,6 +1,7 @@
 // A C++ Program to implement A* Search Algorithm
 #include <bits/stdc++.h>
 using namespace std;
+#include <fstream> // Incluye esto en la parte superior de tu archivo
 
 #define ROW 100
 #define COL 100
@@ -62,32 +63,36 @@ double calculateHValue(int row, int col, Pair dest)
 
 // A Utility Function to trace the path from the source
 // to destination
-void tracePath(cell cellDetails[][COL], Pair dest)
-{
-	printf("\nThe Path is ");
-	int row = dest.first;
-	int col = dest.second;
 
-	stack<Pair> Path;
+void tracePath(cell cellDetails[][COL], Pair dest) {
+    int row = dest.first;
+    int col = dest.second;
 
-	while (!(cellDetails[row][col].parent_i == row
-			&& cellDetails[row][col].parent_j == col)) {
-		Path.push(make_pair(row, col));
-		int temp_row = cellDetails[row][col].parent_i;
-		int temp_col = cellDetails[row][col].parent_j;
-		row = temp_row;
-		col = temp_col;
-	}
+    stack<Pair> Path;
 
-	Path.push(make_pair(row, col));
-	while (!Path.empty()) {
-		pair<int, int> p = Path.top();
-		Path.pop();
-		printf("-> (%d,%d) ", p.first, p.second);
-	}
+    while (!(cellDetails[row][col].parent_i == row && cellDetails[row][col].parent_j == col)) {
+        Path.push(make_pair(row, col));
+        int temp_row = cellDetails[row][col].parent_i;
+        int temp_col = cellDetails[row][col].parent_j;
+        row = temp_row;
+        col = temp_col;
+    }
 
-	return;
+    Path.push(make_pair(row, col));
+
+    std::ofstream outFile("path.txt"); // Abre un archivo de texto para escribir las coordenadas
+
+    while (!Path.empty()) {
+        pair<int, int> p = Path.top();
+        Path.pop();
+        outFile << "(" << p.first << "," << p.second << ")\n"; // Escribe las coordenadas en el archivo
+    }
+
+    outFile.close(); // Cierra el archivo al finalizar
+
+    return;
 }
+
 
 // A Function to find the shortest path between
 // a given source cell to a destination cell according

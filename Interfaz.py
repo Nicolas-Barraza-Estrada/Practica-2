@@ -13,7 +13,7 @@ class WebcamApp:
         self.window = window
         self.window.title(window_title)
 
-        self.vid = cv2.VideoCapture(0)
+        self.vid = cv2.VideoCapture(2)
         self.vid.set(cv2.CAP_PROP_FRAME_WIDTH, ancho)
         self.vid.set(cv2.CAP_PROP_FRAME_HEIGHT, alto)
         self.vid.set(cv2.CAP_PROP_FPS, 60)
@@ -95,7 +95,7 @@ class WebcamApp:
         global matriz_cuadricula
         # Obtener un frame de la webcam
         ret, frame = self.vid.read()
-        color_tablero = [73, 106, 15, 255, 40, 255]
+        color_tablero = [139, 179, 0, 255, 0, 255]
         if ret:
             #frame = cv2.resize(frame, (1280, 720))
             # Convertir el frame a un formato que Tkinter pueda mostrar
@@ -126,8 +126,8 @@ class WebcamApp:
         # Obtener un frame de la webcam
         #print(matriz_str)
         ret, frame = self.vid.read()
-        color_inicio = [90, 107, 178, 255, 205, 255]
-        color_final = [138, 152, 8, 80, 255, 255]
+        color_inicio = [91, 106, 124, 255, 0, 255]
+        color_final = [141, 167, 33, 216, 235, 255]
         inicio_fin = [color_inicio, color_final]
         mask = []
         count = 0
@@ -196,6 +196,7 @@ class WebcamApp:
 
         matriz_str = f"{n} {n}\n" + "\n".join(" ".join(map(str, fila)) for fila in matriz_cuadricula)
         print(matriz_str)
+        print("hola")
 
 
 # Ahora coordenadas solo incluirá tuplas de enteros válidas, ignorando líneas no deseadas

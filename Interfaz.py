@@ -13,9 +13,9 @@ class WebcamApp:
         self.window = window
         self.window.title(window_title)
 
-        self.vid = cv2.VideoCapture(0)
-        self.vid.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        self.vid.set(cv2.CAP_PROP_FRAME_HEIGHT, 960)
+        self.vid = cv2.VideoCapture(2)
+        self.vid.set(cv2.CAP_PROP_FRAME_WIDTH, ancho)
+        self.vid.set(cv2.CAP_PROP_FRAME_HEIGHT, alto)
         self.vid.set(cv2.CAP_PROP_FPS, 60)
 
         self.canvas = tk.Canvas(window, width=self.vid.get(cv2.CAP_PROP_FRAME_WIDTH), height=self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -127,7 +127,7 @@ class WebcamApp:
         #print(matriz_str)
         ret, frame = self.vid.read()
         color_inicio = [90, 107, 178, 255, 205, 255]
-        color_final = [136, 162, 0, 212, 239, 255]
+        color_final = [138, 152, 8, 80, 255, 255]
         inicio_fin = [color_inicio, color_final]
         mask = []
         count = 0
@@ -171,6 +171,7 @@ class WebcamApp:
         stdout, stderr = process.communicate(input=matriz_c)
         # Filtramos las líneas para asegurarnos de que solo procesamos aquellas que contienen coordenadas.
         # Abre el archivo para lectura
+        global coordenadas
         coordenadas = []
         with open('path.txt', 'r') as file:
             # Lee todas las líneas del archivo
@@ -236,8 +237,8 @@ class WebcamApp:
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 coordenadas = (x + w // 2, y + h // 2)
                 if self.guardando_coordenadas:
-                    fila = int(coordenadas[1] / (960 /  100))
-                    columna = int(coordenadas[0] / (1280 / 100))
+                    fila = int(coordenadas[1] / (alto /  n))
+                    columna = int(coordenadas[0] / (ancho / n))
                     self.coordenadas_guardadas.append((fila, columna))
                     print(f"Posición en el laberinto: Fila {fila}, Columna {columna}")
                 self.etiqueta_coordenadas.config(text=f'Coordenadas: {coordenadas}')
@@ -250,19 +251,32 @@ class WebcamApp:
         # Obtener el frame de la video fuente
         ret, frame = self.vid.read()
         if ret:
+            if coordenadas:
+                print(coordenadas)
+                for i in range(1, len(coordenadas)):
+                        fila_previa, columna_previa = coordenadas[i - 1]
+                        fila_actual, columna_actual = coordenadas[i]
+                        punto_previo = (int(columna_previa * (ancho / n)) - 50, int(fila_previa * (alto / n)) - 25)
+                        punto_actual = (int(columna_actual * (ancho / n)) - 50, int(fila_actual * (alto / n)) - 25)
+                        cv2.line(frame, punto_previo, punto_actual, (255, 0, 0), 2)
             if self.guardando_coordenadas:
                 self.detectar_objeto_amarillo(frame)
                 if self.dibujar and len(self.coordenadas_guardadas) > 1:
                     for i in range(1, len(self.coordenadas_guardadas)):
-                        cv2.line(frame, self.coordenadas_guardadas[i - 1], self.coordenadas_guardadas[i], (255, 0, 0), 2)
+                        fila_previa, columna_previa = self.coordenadas_guardadas[i - 1]
+                        fila_actual, columna_actual = self.coordenadas_guardadas[i]
+                        punto_previo = (int(columna_previa * (ancho / n)), int(fila_previa * (alto / n)))
+                        punto_actual = (int(columna_actual * (ancho / n)), int(fila_actual * (alto / n)))
+                        cv2.line(frame, punto_previo, punto_actual, (255, 0, 0), 2)
             frame_resized = cv2.resize(frame, (800, 600))
             self.photo = ImageTk.PhotoImage(image = Image.fromarray(cv2.cvtColor(frame_resized, cv2.COLOR_BGR2RGB)))
             self.canvas.config(width=800, height=600)
             self.canvas.create_image(0, 0, image = self.photo, anchor = tk.NW)
         self.window.after(10, self.update)
 
-
-
+coordenadas = []
+ancho  = 1280
+alto = 960
 n = 100
 root = tk.Tk()
 app = WebcamApp(root, "Tkinter y OpenCV")

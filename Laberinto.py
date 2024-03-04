@@ -226,9 +226,8 @@ class WebcamApp:
 
     def detectar_objeto_amarillo(self, frame):
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        amarillo_bajo = np.array([20, 56, 0])
-        amarillo_alto = np.array([40, 255, 255])
-        mascara = cv2.inRange(hsv, amarillo_bajo, amarillo_alto)
+        amarillo = [20, 40 , 56 , 255 ,0,255]
+        mascara = self.crear_mascara(hsv, amarillo)
         contornos, _ = cv2.findContours(mascara, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         encontrado = False

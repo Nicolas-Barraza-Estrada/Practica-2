@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import imutils
 def resaltadoDeColores():
-    def nada(x):
+    def nada(nada):
         pass
     cam = int(input("Numero de Camara(0/1): "))
     cap = cv2.VideoCapture(cam)
@@ -53,37 +53,9 @@ def resaltadoDeColores():
         cv2.imshow('Ventana', frame)
         if cv2.waitKey(1) & 0xFF == 27:
             break
-    contornos, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
-    for c in contornos:
-        area = cv2.contourArea(c)
-        epsilon = 0.02*cv2.arcLength(c,True)
-        approx = cv2.approxPolyDP(c,epsilon,True)
-        if area != 0:
-            nuevoContorno = cv2.convexHull(c)
-            cv2.drawContours(frame, [nuevoContorno], 0, (255,0,0), 1)
-            if len(approx)==4:
-                x,y,w,h = cv2.boundingRect(c)
-                print(f'{x},{y},{w},{h} ')
-                #x = x - 5
-                #y = y - 5
-                #w = w + 10
-                #h = h + 10
     cap.release()
     cv2.destroyAllWindows()
-    return [Tmin,Tmax,Pmin,Pmax,Lmin,Lmax,cam,Lmax,x,y,w,h]
+    print(f'Camara: {cam}')
+    return [Tmin,Tmax,Pmin,Pmax,Lmin,Lmax]
 arrayHsv = resaltadoDeColores()
-x = arrayHsv[8]
-y = arrayHsv[9]
-w = arrayHsv[10]
-h = arrayHsv[11]
 print(arrayHsv)
-while True:
-    cap = cv2.VideoCapture(arrayHsv[6])
-    ret,frame2 = cap.read()
-    if ret==True:
-        frame = frame2[y:y+h,x:x+w]
-        cv2.imshow('frame',frame)
-    if cv2.waitKey(1) & 0xFF == 27:
-            break
-cap.release()
-cv2.destroyAllWindows()

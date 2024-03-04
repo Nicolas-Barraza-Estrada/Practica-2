@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, Label
+from tkinter import ttk, Label,filedialog
 from PIL import Image, ImageTk
 import cv2
 import numpy as np
@@ -7,7 +7,6 @@ import math
 import subprocess
 import datetime
 import os
-import sys
 class WebcamApp:
     def __init__(self, window, window_title):
         self.window = window
@@ -35,6 +34,9 @@ class WebcamApp:
 
         self.boton_dibujar_trayectoria = ttk.Button(window, text="Dibujar trayectoria", command=self.dibujar_trayectoria)
         self.boton_dibujar_trayectoria.pack(side=tk.LEFT)
+
+        self.btn_cargar_linea = ttk.Button(window, text="Cargar trayectoria", command=self.cargar_trayectoria)
+        self.btn_cargar_linea.pack(side=tk.LEFT)
 
         # Variables de control.
         self.guardando_coordenadas = False
@@ -95,17 +97,16 @@ class WebcamApp:
         global matriz_cuadricula
         # Obtener un frame de la webcam
         ret, frame = self.vid.read()
-        color_tablero = [73, 106, 15, 255, 40, 255]
+        color_tablero = [0, 179, 0, 61, 0, 180]
         if ret:
-            #frame = cv2.resize(frame, (1280, 720))
             # Convertir el frame a un formato que Tkinter pueda mostrar
             hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
             maskTablero = self.crear_mascara(hsv, color_tablero)
             fondo_con_cuadricula = self.dibujar_cuadricula(maskTablero.copy())
-            cv2.imwrite("a.jpg", fondo_con_cuadricula)
+            cv2.imwrite("Laberinto.jpg", fondo_con_cuadricula)
             matriz_cuadricula = self.generar_matriz_cuadricula(maskTablero)
             matriz_str = f"{100} {100}\n" + "\n".join(" ".join(map(str, fila)) for fila in matriz_cuadricula)
-            #print(matriz_str)
+            print(matriz_str)
 
             img = Image.fromarray(maskTablero)
             imgtk = ImageTk.PhotoImage(image=img)
@@ -124,10 +125,9 @@ class WebcamApp:
 
     def capturar_inicio_fin(self):
         # Obtener un frame de la webcam
-        #print(matriz_str)
         ret, frame = self.vid.read()
-        color_inicio = [90, 107, 178, 255, 205, 255]
-        color_final = [138, 152, 8, 80, 255, 255]
+        color_inicio = [91, 131, 185, 255, 135, 255]
+        color_final = [127, 152, 17, 255, 255, 255]
         inicio_fin = [color_inicio, color_final]
         mask = []
         count = 0
@@ -138,7 +138,8 @@ class WebcamApp:
                 maskInicio = self.crear_mascara(hsv, color)
                 mask.append(maskInicio)
                 inicio_fin_cuadricula = self.dibujar_cuadricula(maskInicio.copy())
-                cv2.imwrite(f'{count}.jpg', inicio_fin_cuadricula)
+                if count == 0 : cv2.imwrite(f'inicio.jpg', inicio_fin_cuadricula)
+                else: cv2.imwrite(f'fin.jpg', inicio_fin_cuadricula)
                 count += 1
 
                 img = Image.fromarray(maskInicio)
@@ -167,8 +168,9 @@ class WebcamApp:
         centro_inicio, centro_fin = centros
         matriz_inicio_fin_str = f"{centro_inicio[0]} {centro_inicio[1]} {centro_fin[0]} {centro_fin[1]} \n"
         matriz_c = f"{centro_inicio[0]} {centro_inicio[1]} {centro_fin[0]} {centro_fin[1]} \n" + "\n".join(" ".join(map(str, fila)) for fila in matriz_cuadricula)
-        process = subprocess.Popen(['./revisar'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+        process = subprocess.Popen(['./a-estrella'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
         stdout, stderr = process.communicate(input=matriz_c)
+        print(stdout)
         # Filtramos las líneas para asegurarnos de que solo procesamos aquellas que contienen coordenadas.
         # Abre el archivo para lectura
         global coordenadas
@@ -182,14 +184,12 @@ class WebcamApp:
                 # Elimina los caracteres de nueva línea y espacios adicionales
                 line = line.strip()
                 # Imprime la línea (coordenada)
-                # Opcional: Convertir la cadena a una tupla de enteros
                 # Esto asume que el formato de cada línea es '(x,y)'
-                # Quita los paréntesis y divide por la coma
+                # Quita los paréntesis y separa por la coma
                 coordinates = line[1:-1].split(',')
                 # Convierte los elementos divididos en enteros
                 x, y = int(coordinates[0]), int(coordinates[1])
-                # Ahora puedes usar x, y como enteros, por ejemplo, agregarlos a una lista o realizar cálculos
-                #print(f"({x}, {y})")
+                # Ahora se puede usar x, y como enteros
                 matriz_cuadricula[x][y] = 8
                 coordenadas.append([x, y])
         for i in coordenadas:print(i)
@@ -204,7 +204,8 @@ class WebcamApp:
         if self.guardando_coordenadas:
             self.guardando_coordenadas = False
             fecha_hora = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            archivo_txt = f'{fecha_hora}.txt'
+            # trayectoria/fecha_hora.txt
+            archivo_txt = os.path.join('trayectoria', f'{fecha_hora}.txt')
             with open(archivo_txt, 'w') as f:
                 for coord in self.coordenadas_guardadas:
                     f.write(f'{coord[0]}, {coord[1]}\n')
@@ -214,6 +215,7 @@ class WebcamApp:
             self.guardando_coordenadas = True
             self.coordenadas_guardadas = []
             self.boton_grabar.config(text="Detener Grabación")
+            self.etiqueta_coordenadas.config(text='--')
 
     def dibujar_trayectoria(self):
         self.dibujar = not self.dibujar
@@ -224,8 +226,8 @@ class WebcamApp:
 
     def detectar_objeto_amarillo(self, frame):
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        amarillo_bajo = np.array([29, 37, 125])
-        amarillo_alto = np.array([54, 203, 255])
+        amarillo_bajo = np.array([20, 56, 0])
+        amarillo_alto = np.array([40, 255, 255])
         mascara = cv2.inRange(hsv, amarillo_bajo, amarillo_alto)
         contornos, _ = cv2.findContours(mascara, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -245,7 +247,9 @@ class WebcamApp:
                 encontrado = True
                 break  # Solo nos interesa el primer objeto grande encontrado
         if not encontrado:
-            self.etiqueta_coordenadas.config(text='Objeto amarillo no detectado')
+            self.etiqueta_coordenadas.config(text='')
+            self.guardando_coordenadas = True
+            self.comenzar_a_grabar()
 
     def update(self):
         # Obtener el frame de la video fuente
@@ -256,8 +260,8 @@ class WebcamApp:
                 for i in range(1, len(coordenadas)):
                         fila_previa, columna_previa = coordenadas[i - 1]
                         fila_actual, columna_actual = coordenadas[i]
-                        punto_previo = (int(columna_previa * (ancho / n)) - 50, int(fila_previa * (alto / n)) - 25)
-                        punto_actual = (int(columna_actual * (ancho / n)) - 50, int(fila_actual * (alto / n)) - 25)
+                        punto_previo = (int(columna_previa * (ancho / n)) - 40, int(fila_previa * (alto / n)) - 25)
+                        punto_actual = (int(columna_actual * (ancho / n)) - 40, int(fila_actual * (alto / n)) - 25)
                         cv2.line(frame, punto_previo, punto_actual, (255, 0, 0), 2)
             if self.guardando_coordenadas:
                 self.detectar_objeto_amarillo(frame)
@@ -267,12 +271,24 @@ class WebcamApp:
                         fila_actual, columna_actual = self.coordenadas_guardadas[i]
                         punto_previo = (int(columna_previa * (ancho / n)), int(fila_previa * (alto / n)))
                         punto_actual = (int(columna_actual * (ancho / n)), int(fila_actual * (alto / n)))
-                        cv2.line(frame, punto_previo, punto_actual, (255, 0, 0), 2)
-            frame_resized = cv2.resize(frame, (800, 600))
+                        cv2.line(frame, punto_previo, punto_actual, (0, 255, 0), 2)
+            frame_resized = cv2.resize(frame, (1280, 960))
             self.photo = ImageTk.PhotoImage(image = Image.fromarray(cv2.cvtColor(frame_resized, cv2.COLOR_BGR2RGB)))
-            self.canvas.config(width=800, height=600)
+            self.canvas.config(width=1280, height=960)
             self.canvas.create_image(0, 0, image = self.photo, anchor = tk.NW)
         self.window.after(10, self.update)
+
+    def cargar_trayectoria(self):
+        global coordenadas
+        coordenadas = []
+        filename = tk.filedialog.askopenfilename(initialdir = "trayectoria", title = "Seleccionar archivo", filetypes = (("txt files", "*.txt"), ("all files", "*.*")))
+        if filename:
+            with open(filename, 'r') as f:
+                lines = f.readlines()
+                for line in lines:
+                    x, y = map(int, line.split(','))
+                    coordenadas.append((x, y))
+            print(coordenadas)
 
 coordenadas = []
 ancho  = 1280

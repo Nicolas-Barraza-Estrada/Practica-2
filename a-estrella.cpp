@@ -1,9 +1,10 @@
 // A C++ Program to implement A* Search Algorithm
 #include <bits/stdc++.h>
 using namespace std;
+#include <fstream> // Incluye esto en la parte superior de tu archivo
 
-#define ROW 20
-#define COL 20
+#define ROW 100
+#define COL 100
 
 // Creating a shortcut for int, int pair type
 typedef pair<int, int> Pair;
@@ -62,32 +63,36 @@ double calculateHValue(int row, int col, Pair dest)
 
 // A Utility Function to trace the path from the source
 // to destination
-void tracePath(cell cellDetails[][COL], Pair dest)
-{
-	printf("\nThe Path is ");
-	int row = dest.first;
-	int col = dest.second;
 
-	stack<Pair> Path;
+void tracePath(cell cellDetails[][COL], Pair dest) {
+    int row = dest.first;
+    int col = dest.second;
 
-	while (!(cellDetails[row][col].parent_i == row
-			&& cellDetails[row][col].parent_j == col)) {
-		Path.push(make_pair(row, col));
-		int temp_row = cellDetails[row][col].parent_i;
-		int temp_col = cellDetails[row][col].parent_j;
-		row = temp_row;
-		col = temp_col;
-	}
+    stack<Pair> Path;
 
-	Path.push(make_pair(row, col));
-	while (!Path.empty()) {
-		pair<int, int> p = Path.top();
-		Path.pop();
-		printf("-> (%d,%d) ", p.first, p.second);
-	}
+    while (!(cellDetails[row][col].parent_i == row && cellDetails[row][col].parent_j == col)) {
+        Path.push(make_pair(row, col));
+        int temp_row = cellDetails[row][col].parent_i;
+        int temp_col = cellDetails[row][col].parent_j;
+        row = temp_row;
+        col = temp_col;
+    }
 
-	return;
+    Path.push(make_pair(row, col));
+
+    std::ofstream outFile("path.txt"); // Abre un archivo de texto para escribir las coordenadas
+
+    while (!Path.empty()) {
+        pair<int, int> p = Path.top();
+        Path.pop();
+        outFile << "(" << p.first << "," << p.second << ")\n"; // Escribe las coordenadas en el archivo
+    }
+
+    outFile.close(); // Cierra el archivo al finalizar
+
+    return;
 }
+
 
 // A Function to find the shortest path between
 // a given source cell to a destination cell according
@@ -614,38 +619,29 @@ int main()
 	/* Description of the Grid-
 	1--> The cell is not blocked
 	0--> The cell is blocked */
-	int grid[ROW][COL]
-		= { 
-		    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1},
-            {1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1},
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1},
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1} };
+	int i1, i2,f1,f2;
+    std::cin >> i1 >> i2 >> f1 >> f2;
+	int grid[ROW][COL];
     for (int i = 0; i < ROW; ++i) {
         for (int j = 0; j < COL; ++j) {
-            grid[i][j] = (grid[i][j] == 0) ? 1 : 0;
+            std::cin >> grid[i][j];
         }
     }
 	// Source is the left-most bottom-most corner
-	Pair src = make_pair(1, 13);
+	Pair src = make_pair(i1, i2);
 
 	// Destination is the left-most top-most corner
-	Pair dest = make_pair(17, 17);
+	Pair dest = make_pair(f1, f2);
+	//IMPRIMIR SRC Y DEST
+	std::cout << "Source: " << src.first << ", " << src.second << std::endl;
+	std::cout << "Destination: " << dest.first << ", " << dest.second << std::endl;
+	//imprime la matriz
+	for (int i = 0; i < ROW; ++i) {
+		for (int j = 0; j < COL; ++j) {
+			std::cout << grid[i][j] << " ";
+		}
+		std::cout << std::endl;
+	}
 
 	aStarSearch(grid, src, dest);
 

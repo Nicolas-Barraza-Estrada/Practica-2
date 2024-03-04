@@ -97,7 +97,7 @@ class WebcamApp:
         global matriz_cuadricula
         # Obtener un frame de la webcam
         ret, frame = self.vid.read()
-        color_tablero = [0, 179, 0, 61, 0, 180]
+        color_tablero = [0, 179, 0, 61, 0, 190]
         if ret:
             # Convertir el frame a un formato que Tkinter pueda mostrar
             hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -259,8 +259,8 @@ class WebcamApp:
                 for i in range(1, len(coordenadas)):
                         fila_previa, columna_previa = coordenadas[i - 1]
                         fila_actual, columna_actual = coordenadas[i]
-                        punto_previo = (int(columna_previa * (ancho / n)) - 40, int(fila_previa * (alto / n)) - 25)
-                        punto_actual = (int(columna_actual * (ancho / n)) - 40, int(fila_actual * (alto / n)) - 25)
+                        punto_previo = (int(columna_previa * (ancho / n)) - 30, int(fila_previa * (alto / n)) - 30)
+                        punto_actual = (int(columna_actual * (ancho / n)) - 30, int(fila_actual * (alto / n)) - 30)
                         cv2.line(frame, punto_previo, punto_actual, (255, 0, 0), 2)
             if self.guardando_coordenadas:
                 self.detectar_objeto_amarillo(frame)

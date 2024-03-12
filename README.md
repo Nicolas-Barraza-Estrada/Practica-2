@@ -5,7 +5,7 @@ Proyecto realizado para el laboratorio CIMUBB
 Instrucciones:
 
 
-![Video Tutorial](https://drive.google.com/file/d/1-76zE3lkF3FS-7llIcViA66MmUarXBoX/view?usp=sharing)
+![Video Tutorial](https://drive.google.com/file/d/1-76zE3lkF3FS-7llIcViA66MmUarXBoX)
 
 Cada vez que se modifique el laberinto o la iluminación, se deben ajustar los colores que reconoce. Para ello, deben abrir el programa HSVTEST.py y posicionar el Matiz dentro del rango de colores que desean reconocer. En este caso, debido a las condiciones de iluminación y los materiales utilizados, no se pudo separar adecuadamente el fondo de la maqueta del color de las paredes. Por lo tanto, se tomará un rango más amplio y se reducirá la saturación y el brillo. Lo ideal es que la imagen tenga el menor ruido posible, mostrando el fondo blanco y las paredes y agujeros negro.
 
